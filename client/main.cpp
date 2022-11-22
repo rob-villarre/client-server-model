@@ -2,6 +2,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "client.h"
+
 int main(int argc, char *argv[]) {
 
   if (argc != 3) {
@@ -23,8 +25,9 @@ int main(int argc, char *argv[]) {
     return 0;
   }
   
-  std::cout << port << " " << ip_address << "\n";
-
+  // 192.168.19.132
+  Client client = Client(port, ip_address);
+  client.run();
 
   return 0;
 }

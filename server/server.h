@@ -15,7 +15,7 @@
 #define BACKLOG 10
 #define BUFFER_SIZE 100
 #define MAX_NFDS 50
-#define TIMEOUT 1000
+#define TIMEOUT 100000
 
 class Server {
 
@@ -23,13 +23,19 @@ class Server {
     Server(int port);
     ~Server();
     void run();
+    
 
   private:
     int port;
     int listen_fd;
+    int transaction_number;
     struct sockaddr_in server_address;
     std::shared_ptr<char[]> buffer; 
-    std::shared_ptr<std::vector<pollfd>> fd_vector;
+    std::vector<pollfd> fds;
+
+    int accept_connection();
+    int receive_data(int i);
+    void simulate_transaction(int n, std::string client_machine_name, pid_t client_pid);
     
   
 };

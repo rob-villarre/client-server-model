@@ -6,11 +6,11 @@ BIN_DIR =./# ./bin#exacutable
 
 # valgrind --leak-check=yes --leak-check=full --show-leak-kinds=all ./bin/run
 
-OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/server.o
+OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/server.o $(BUILD_DIR)/tands.o
 LINK_TARGET = $(BIN_DIR)/server
 
 CC = g++
-COMPILER_FLAGS = -w -Wall
+COMPILER_FLAGS = -O -g -w -Wall -Wextra
 
 #Note: $< is the first prerequisite
 #Note: $@ name of target
@@ -23,7 +23,10 @@ $(LINK_TARGET): $(OBJS)
 $(BUILD_DIR)/main.o: $(SRC_DIR)/main.cpp
 	$(CC) $(COMPILER_FLAGS) -c $< -o $@
 
-$(BUILD_DIR)/server.o: $(SRC_DIR)/server.cpp $(SRC_DIR)/server.h
+$(BUILD_DIR)/server.o: $(SRC_DIR)/server.cpp $(INCLUDE_DIR)/server.h
+	$(CC) $(COMPILER_FLAGS) -c $< -o $@
+
+$(BUILD_DIR)/tands.o: $(SRC_DIR)/tands.cpp $(INCLUDE_DIR)/tands.h
 	$(CC) $(COMPILER_FLAGS) -c $< -o $@
 
 clean:
