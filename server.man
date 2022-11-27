@@ -1,0 +1,18 @@
+.TH server "2022-11-27" "1.0" "server man page"
+.SH NAME
+server
+.SH SYNOPSIS
+server [PORT]
+.SH ARGUMENTS
+server arguments:
+    PORT: port number between 5000 and 64000
+.SH DESCRIPTION
+server starts listening on port [port] for clients.
+server recieves Tn from a client and performs a transaction with n cpu cycles.
+server can have a maximum of 32 clients with 16 in backlog.
+server times out after 30 seconds of inactivity.
+server will log activity to a file named server.log
+.SH SEE ALSO
+client
+.SH AUTHOR
+Roberto Villarreal Andrade, CCID: villarre, ID: 1627153

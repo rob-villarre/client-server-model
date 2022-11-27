@@ -16,7 +16,7 @@
 #define BACKLOG 16
 #define BUFFER_SIZE 128
 #define MAX_NFDS 32
-#define TIMEOUT 5000
+#define TIMEOUT 30000
 
 class Server {
 

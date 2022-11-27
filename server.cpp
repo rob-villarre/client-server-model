@@ -117,6 +117,7 @@ int Server::accept_connection() {
     perror("accept");
     exit(EXIT_FAILURE);
   }
+  printf("Client %d connected\n", fd);
   pollfd poll_fd;
   poll_fd.fd = fd;
   poll_fd.events = POLLIN;
@@ -137,17 +138,19 @@ int Server::receive_data(int i) {
 
   // connection close by client
   if (bytes == 0) {
+    fprintf(stdout, "Client %d disconnected\n", this->fds[i].fd);
     close(this->fds[i].fd);
     this->fds.erase(this->fds.begin()+i);
-    fprintf(stdout, "Client disconnected\n");
     return 0;
   }
 
   // data received
   int n;
-  char client_name[BUFFER_SIZE];
-
+  char client_name[BUFFER_SIZE] = {0};
   sscanf(this->buffer.get(), "%i %s", &n, client_name);  
+
+  printf("Recieved T%d from %s\n", n, client_name);
+
   this->simulate_transaction(n, std::string(client_name));
 
   // response message
@@ -156,6 +159,8 @@ int Server::receive_data(int i) {
     fprintf(stderr, "Error: send failed\n");
     exit(EXIT_FAILURE);
   }
+
+  printf("Sent D%d to %s\n", this->transaction_number, client_name);
 
   return 0;
 }

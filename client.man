@@ -1,0 +1,17 @@
+.TH client "2022-11-27" "1.0" "client man page"
+.SH NAME
+client
+.SH SYNOPSIS
+client [PORT] [IP ADDRESS]
+.SH ARGUMENTS
+client arguments:
+    PORT: port number between 5000 and 64000
+    IP ADDRESS: IP address of server
+.SH DESCRIPTION
+client connects to a server specified by the port [PORT] and ip-address [IP ADDRESS].
+client takes in input Tn or Sn where Tn sends a transaction with n cpu cycles to the server and Sn makes the client wait for n nanoseconds.
+client will log activity to a file named machine_name.pid
+.SH SEE ALSO
+server
+.SH AUTHOR
+Roberto Villarreal Andrade, CCID: villarre, ID: 1627153

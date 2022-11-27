@@ -52,6 +52,8 @@ void Client::send_data(int n) {
   }
   this->log_send('T', n);
 
+  printf("Sent T%d to server\n", n);
+
   this->sent_trans_count++;
 
   // receive response
@@ -69,6 +71,7 @@ void Client::send_data(int n) {
   char c;
   int tn;
   sscanf(this->buffer.get(), "%c %d", &c, &tn);
+  printf("Recieved D%d from server\n", tn);
   this->log_recv(c, tn);
 }
 

@@ -40,9 +40,12 @@ $(BUILD_DIR)/client_main.o: $(SRC_DIR)/client_main.cpp
 $(BUILD_DIR)/client.o: $(SRC_DIR)/client.cpp $(INCLUDE_DIR)/client.h
 	$(CC) $(COMPILER_FLAGS) -c $< -o $@
 
-$(BUILD_DIR)/tands.o: $(SRC_DIR)/tands.cpp $(INCLUDE_DIR)/tands.h
-	$(CC) $(COMPILER_FLAGS) -c $< -o $@
-
 clean:
 	rm -f $(BUILD_DIR)/*.o
 	rm -f $(LINK_TARGET)
+
+serverman:
+	groff -Tpdf -man < server.man > server.pdf
+
+clientman:
+	groff -Tpdf -man < client.man > client.pdf
