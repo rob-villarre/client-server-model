@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-
+#include <memory>
 #include "client.h"
 
 int main(int argc, char *argv[]) {
@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
   }
   
   // 192.168.19.132
-  Client client = Client(port, ip_address);
-  client.run();
+  std::shared_ptr<Client> client = std::make_shared<Client>(port, ip_address);
+  client.get()->run();
 
   return 0;
 }

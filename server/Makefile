@@ -4,7 +4,7 @@ BUILD_DIR =./# ./build#object files
 INCLUDE_DIR =./# ./inc#.hpp files
 BIN_DIR =./# ./bin#exacutable
 
-# valgrind --leak-check=yes --leak-check=full --show-leak-kinds=all ./bin/run
+# valgrind --leak-check=yes --leak-check=full --show-leak-kinds=all ./client 5000 127.0.1.1
 
 OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/server.o $(BUILD_DIR)/tands.o
 LINK_TARGET = $(BIN_DIR)/server

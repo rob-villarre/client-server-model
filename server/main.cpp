@@ -22,7 +22,8 @@ int main(int argc, char *argv[]) {
   
   std::cout << port << "\n";
 
-  Server server = Server(port);
-  server.run();
+  std::shared_ptr<Server> server = std::make_shared<Server>(port);
+  server.get()->run();
+
   return 0;
 }

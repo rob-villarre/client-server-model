@@ -25,9 +25,20 @@ class Client {
     std::string ip_address;
     int socket_fd;
     pid_t pid;
-    std::shared_ptr<char[]> buffer;
+    std::unique_ptr<char[]> buffer;
+    std::string name;
     struct sockaddr_in server_address;
     std::string hostname;
     std::tuple<char, int> read_command();
+    void simulate_wait(int n);
+
+    double epoch_time_seconds();
+    // log
+    FILE *logfile;
+    void log_client_info();
+    void log_send();
+    void log_recv(char c, int n);
+    void log_sleep(int n);
+    void log_summary();
 
 };

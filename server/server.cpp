@@ -7,13 +7,15 @@
 #include <algorithm>
 #include <cstring>
 #include <chrono>
+#include <unistd.h>
+#include <limits.h>
 
 // https://www.ibm.com/docs/en/i/7.1?topic=designs-example-nonblocking-io-select
 // https://www.ibm.com/docs/en/i/7.1?topic=designs-using-poll-instead-select
 Server::Server(int port) {
   this->port = port;
 
-  this->buffer = std::make_shared<char[]>(BUFFER_SIZE);
+  this->buffer = std::make_unique<char[]>(BUFFER_SIZE);
   // this->fds = std::vector<pollfd>();
   this->transaction_number = 0;
 
@@ -58,7 +60,7 @@ Server::Server(int port) {
   poll_fd.events = POLLIN;
   this->fds.push_back(poll_fd);
 
-  printf("server fd: %d\n", this->listen_fd);
+  this->logfile = fopen("server.log", "w");
 
 }
 
@@ -66,10 +68,13 @@ Server::~Server() {
   for (auto poll_fd : this->fds)
     close(poll_fd.fd);
   close(this->listen_fd);
+
+  fclose(this->logfile);
 }
 
 void Server::run() {
-
+  this->start_time = epoch_time_seconds();
+  this->log_server_info();
   for (;;) {
     // auto fds = this->fd_vector.data();
     int nfds = this->fds.size();
@@ -81,7 +86,8 @@ void Server::run() {
     }
     if (result == 0) {
       fprintf(stderr, "poll timed out\n");
-      exit(EXIT_FAILURE);
+      break;
+      // exit(EXIT_FAILURE);
     }
     // https://stackoverflow.com/questions/59888254/find-out-if-the-socket-was-accepted-or-not
     for (int i = 0; i < this->fds.size(); i++) {
@@ -109,6 +115,9 @@ void Server::run() {
       }
     }
   };
+  // printf("here\n");
+  this->log_summary();
+  // return;
 }
 
 int Server::accept_connection() {
@@ -129,16 +138,15 @@ int Server::accept_connection() {
 
 int Server::receive_data(int i) {
 
-  // reset buffer
-  memset(this->buffer.get(), '\0', sizeof(this->buffer.get()));
+  ssize_t bytes = recv(this->fds[i].fd, this->buffer.get(), BUFFER_SIZE, 0);
 
-  ssize_t bytes = recv(this->fds[i].fd, this->buffer.get(), sizeof(this->buffer.get()), 0);
   // error
   if (bytes < 0) {
     perror("recv");
     exit(EXIT_FAILURE);
     return 0;
   }
+
   // connection close by client
   if (bytes == 0) {
     close(this->fds[i].fd);
@@ -147,13 +155,20 @@ int Server::receive_data(int i) {
     return 0;
   }
   // data received
+
+  this->buffer.get()[bytes] = '\0';
+
   int n;
-  sscanf(this->buffer.get(), " %i", &n);
-  fprintf(stdout, "received from %d: %d\n", this->fds[i].fd, n);
-  this->simulate_transaction(n, "machine", (pid_t) 20);
+  char client_name[BUFFER_SIZE];
+
+  sscanf(this->buffer.get(), "%i %s", &n, client_name);
+
+  printf("name: %s n: %d\n", client_name, n);
+  
+  this->simulate_transaction(n, std::string(client_name), (pid_t) 20);
 
   // response message
-  snprintf((char *)this->buffer.get(), sizeof(this->buffer.get()), "%c %d", 'D', this->transaction_number);
+  snprintf((char *)this->buffer.get(), BUFFER_SIZE, "%c %d\r\n", 'D', this->transaction_number);
   if (send(this->fds[i].fd, this->buffer.get(), strlen(this->buffer.get()), 0) < 0) {
     fprintf(stderr, "Error: send failed\n");
     exit(EXIT_FAILURE);
@@ -162,13 +177,45 @@ int Server::receive_data(int i) {
   return 0;
 }
 
-void Server::simulate_transaction(int n, std::string client_machine_name, pid_t client_pid) {
-  double start_epoch_time = (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / (double)1000;
+void Server::simulate_transaction(int n, std::string client_name, pid_t client_pid) {
   this->transaction_number++;
 
+  this->log_recv_trans(n, client_name);
 
   Trans(n);
 
-  double end_epoch_time = (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / (double)1000;
+  this->log_send_done(client_name);
+  this->end_time = epoch_time_seconds();
+
+  this->transactions[client_name]++;
+
   return;
+}
+
+double Server::epoch_time_seconds() {
+  return (double) std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / (double)1000;
+}
+
+void Server::log_server_info() {
+  fprintf(this->logfile, "Using port %d\n", this->port);
+  fflush(this->logfile);
+}
+
+void Server::log_recv_trans(int n, std::string client_name) {
+  fprintf(this->logfile, "%.2f: # %d (T %d) from %s\n", this->epoch_time_seconds(), this->transaction_number, n, client_name.c_str());
+  fflush(this->logfile);
+}
+
+void Server::log_send_done(std::string client_name) {
+  fprintf(this->logfile, "%.2f: # %d (Done) from %s\n", this->epoch_time_seconds(), this->transaction_number, client_name.c_str());
+  fflush(this->logfile);
+}
+
+void Server::log_summary() {
+  fprintf(this->logfile, "\nSUMMARY\n");
+  for (auto it : this->transactions)
+    fprintf(this->logfile, "\t%d transactions from %s\n", it.second, it.first.c_str());
+  double time = this->end_time - this->start_time;
+  fprintf(this->logfile, "%.1f transactions/sec (%d/%.2f)\n", (float) this->transaction_number / time, this->transaction_number, time);
+  fflush(this->logfile);
 }

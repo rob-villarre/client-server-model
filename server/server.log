@@ -1,0 +1,9 @@
+Using port 5000
+1669558748.12: # 1 (T 5) from ubuntu.152969
+1669558748.12: # 1 (Done) from ubuntu.152969
+1669558751.49: # 2 (T 45) from ubuntu.152969
+1669558751.50: # 2 (Done) from ubuntu.152969
+
+SUMMARY
+	2 transactions from ubuntu.152969
+0.3 transactions/sec (2/7.19)
