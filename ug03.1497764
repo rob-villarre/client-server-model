@@ -1,0 +1,20 @@
+Using port 5002
+Using server address 129.128.41.13
+Host ug03.1497764
+1669592809.76: Send (T 5)
+1669592809.77: Recv (D 1)
+1669592811.43: Send (T 23)
+1669592811.45: Recv (D 2)
+1669592815.63: Send (T 34)
+1669592815.70: Recv (D 3)
+1669592817.55: Send (T 2332)
+1669592819.15: Recv (D 4)
+1669592820.57: Send (T 99)
+1669592820.64: Recv (D 5)
+Sleep for 100 units
+1669592823.70: Send (T 23)
+1669592823.76: Recv (D 6)
+1669592825.69: Send (T 99)
+1669592825.76: Recv (D 7)
+Sleep for 3 units
+Sent 7 transactions

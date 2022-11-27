@@ -1,0 +1,8 @@
+Using port 6000
+Using server address 129.128.29.33
+Host ug03.1496260
+1669592654.48: Send (T 5)
+1669592654.49: Recv (D 1)
+1669592657.23: Send (T 3245)
+1669592659.65: Recv (D 2)
+Sent 2 transactions

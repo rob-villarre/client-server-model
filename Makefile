@@ -12,7 +12,7 @@ SERVER_LINK_TARGET = $(BIN_DIR)/server
 CLIENT_LINK_TARGET = $(BIN_DIR)/client
 
 CC = g++
-COMPILER_FLAGS = -O -g -w -Wall -Wextra
+COMPILER_FLAGS = -O -w -Wall -Wextra
 
 #Note: $< is the first prerequisite
 #Note: $@ name of target
