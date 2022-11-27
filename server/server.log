@@ -1,9 +1,0 @@
-Using port 5000
-1669559319.57: # 1 (T 5) from ubuntu.153911
-1669559319.57: # 1 (Done) from ubuntu.153911
-1669559321.46: # 2 (T 23) from ubuntu.153911
-1669559321.47: # 2 (Done) from ubuntu.153911
-
-SUMMARY
-	2 transactions from ubuntu.153911
-0.5 transactions/sec (2/3.89)

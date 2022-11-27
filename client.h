@@ -10,7 +10,7 @@
 #include <netinet/in.h>
 #include <tuple>
 
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 128
 
 class Client {
 
@@ -31,12 +31,13 @@ class Client {
     std::string hostname;
     std::tuple<char, int> read_command();
     void simulate_wait(int n);
+    int sent_trans_count;
 
     double epoch_time_seconds();
     // log
     FILE *logfile;
     void log_client_info();
-    void log_send();
+    void log_send(char c, int n);
     void log_recv(char c, int n);
     void log_sleep(int n);
     void log_summary();

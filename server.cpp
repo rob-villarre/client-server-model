@@ -10,8 +10,6 @@
 #include <unistd.h>
 #include <limits.h>
 
-// https://www.ibm.com/docs/en/i/7.1?topic=designs-example-nonblocking-io-select
-// https://www.ibm.com/docs/en/i/7.1?topic=designs-using-poll-instead-select
 Server::Server(int port) {
   this->port = port;
 
@@ -72,31 +70,27 @@ Server::~Server() {
   fclose(this->logfile);
 }
 
+
 void Server::run() {
   this->start_time = epoch_time_seconds();
+  this->end_time = epoch_time_seconds();
   this->log_server_info();
   for (;;) {
-    // auto fds = this->fd_vector.data();
-    int nfds = this->fds.size();
 
-    int result = poll(fds.data(), nfds, TIMEOUT);
+    int result = poll(this->fds.data(), this->fds.size(), TIMEOUT);
     if (result < 0) {
       perror("poll");
       exit(EXIT_FAILURE);
     }
     if (result == 0) {
-      fprintf(stderr, "poll timed out\n");
+      fprintf(stderr, "poll timed out\n"); // TODO: set to 30 sec
       break;
-      // exit(EXIT_FAILURE);
     }
-    // https://stackoverflow.com/questions/59888254/find-out-if-the-socket-was-accepted-or-not
-    for (int i = 0; i < this->fds.size(); i++) {
-      
-      // printf("fd: %d\n", fd);
 
-      if (fds[i].revents == 0) {
+    for (int i = 0; i < this->fds.size(); i++) {
+
+      if (fds[i].revents == 0)
         continue;
-      }
     
       if (fds[i].revents != POLLIN) {
         fprintf(stderr, "Unexpected returned event\n");
@@ -105,19 +99,13 @@ void Server::run() {
       
       // Accept all incoming connections that are queued up
       // stop accepting when max number of fds is reached
-      // https://stackoverflow.com/questions/28098563/errno-after-accept-in-linux-socket-programming
-      if (fds[i].fd == listen_fd) {
-        if (this->fds.size() < MAX_NFDS) {
-          while ((this->accept_connection()) > 0);
-        }
-      } else {
+      if (fds[i].fd == listen_fd)
+          while (this->fds.size() <= MAX_NFDS && this->accept_connection() > 0);
+      else
         receive_data(i);
-      }
     }
   };
-  // printf("here\n");
   this->log_summary();
-  // return;
 }
 
 int Server::accept_connection() {
@@ -154,18 +142,13 @@ int Server::receive_data(int i) {
     fprintf(stdout, "Client disconnected\n");
     return 0;
   }
+
   // data received
-
-  this->buffer.get()[bytes] = '\0';
-
   int n;
   char client_name[BUFFER_SIZE];
 
-  sscanf(this->buffer.get(), "%i %s", &n, client_name);
-
-  printf("name: %s n: %d\n", client_name, n);
-  
-  this->simulate_transaction(n, std::string(client_name), (pid_t) 20);
+  sscanf(this->buffer.get(), "%i %s", &n, client_name);  
+  this->simulate_transaction(n, std::string(client_name));
 
   // response message
   snprintf((char *)this->buffer.get(), BUFFER_SIZE, "%c %d\r\n", 'D', this->transaction_number);
@@ -177,7 +160,8 @@ int Server::receive_data(int i) {
   return 0;
 }
 
-void Server::simulate_transaction(int n, std::string client_name, pid_t client_pid) {
+void Server::simulate_transaction(int n, std::string client_name) {
+  
   this->transaction_number++;
 
   this->log_recv_trans(n, client_name);

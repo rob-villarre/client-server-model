@@ -5,7 +5,6 @@
 #include <limits.h>
 #include <chrono>
 
-// https://www.ibm.com/docs/en/i/7.1?topic=clients-example-ipv4-ipv6-client
 Client::Client(int port, std::string ip_address) {
 
   this->port = port;
@@ -18,7 +17,6 @@ Client::Client(int port, std::string ip_address) {
   gethostname(hostname, HOST_NAME_MAX);
   this->hostname = std::string(hostname);
   this->name = this->hostname + "." + std::to_string(this->pid);
-
 
   this->server_address.sin_family = AF_INET;
   this->server_address.sin_addr.s_addr = inet_addr(ip_address.c_str());
@@ -46,12 +44,15 @@ Client::~Client() {
 
 void Client::send_data(int n) {
 
-  snprintf((char *) this->buffer.get(), BUFFER_SIZE, "%d %s\r\n", n, this->name.c_str());
   // send request
+  snprintf((char *) this->buffer.get(), BUFFER_SIZE, "%d %s\r\n", n, this->name.c_str());
   if (send(this->socket_fd, this->buffer.get(), strlen(this->buffer.get()), 0) < 0) {
       perror("socket send");
       exit(EXIT_FAILURE);
   }
+  this->log_send('T', n);
+
+  this->sent_trans_count++;
 
   // receive response
   ssize_t bytes = recv(this->socket_fd, this->buffer.get(), BUFFER_SIZE, 0);
@@ -60,19 +61,15 @@ void Client::send_data(int n) {
     exit(EXIT_FAILURE);
   }
   if (bytes == 0) {
-    fprintf(stderr, "The server closed the connection");
+    fprintf(stderr, "The server closed the connection\n");
     exit(EXIT_FAILURE);
   }
 
   // data received
-  this->buffer.get()[bytes] = '\0';
-  int rn;
-  char rm;
-  printf("%s\n", this->buffer.get());
-  sscanf(this->buffer.get(), "%c %d", &rm, &rn);
-  std::cout << rn << " " << rm << std::endl;
-
-  this->log_recv(rm, rn);
+  char c;
+  int tn;
+  sscanf(this->buffer.get(), "%c %d", &c, &tn);
+  this->log_recv(c, tn);
 }
 
 std::tuple<char, int> Client::read_command() {
@@ -87,7 +84,6 @@ std::tuple<char, int> Client::read_command() {
   }
 }
 
-// hostname -i
 void Client::run() {
   
   this->log_client_info();
@@ -113,6 +109,7 @@ void Client::run() {
       this->send_data(n); 
   }
 
+  this->log_summary();
   return;
 }
 
@@ -125,7 +122,6 @@ double Client::epoch_time_seconds() {
   return (double) std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / (double)1000;
 }
 
-
 void Client::log_client_info() {
   fprintf(this->logfile, "Using port %d\n", this->port);
   fprintf(this->logfile, "Using server address %s\n", this->ip_address.c_str());
@@ -133,8 +129,9 @@ void Client::log_client_info() {
   fflush(this->logfile);
 }
 
-void Client::log_send() {
-
+void Client::log_send(char c, int n) {
+  fprintf(this->logfile, "%.2f: Send (%c %d)\n", this->epoch_time_seconds(), c, n);
+  fflush(this->logfile);
 }
 
 void Client::log_recv(char c, int n) {
@@ -148,5 +145,6 @@ void Client::log_sleep(int n) {
 }
 
 void Client::log_summary() {
-
+  fprintf(this->logfile, "Sent %d transactions\n", this->sent_trans_count);
+  fflush(this->logfile);
 }
