@@ -17,7 +17,7 @@ COMPILER_FLAGS = -O -w -Wall -Wextra
 #Note: $< is the first prerequisite
 #Note: $@ name of target
 
-all: $(SERVER_LINK_TARGET) $(CLIENT_LINK_TARGET)
+all: $(SERVER_LINK_TARGET) $(CLIENT_LINK_TARGET) serverman clientman
 
 $(SERVER_LINK_TARGET): $(SERVER_OBJS) 
 	$(CC) $(SERVER_OBJS)  $(COMPILER_FLAGS) -o $(SERVER_LINK_TARGET)
